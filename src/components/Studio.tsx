@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useT } from "@/i18n/LanguageProvider";
 import { Logo, LangSwitch } from "@/components/Landing";
 import Trimmer, { type Trim } from "@/components/Trimmer";
+import Exporter from "@/components/Exporter";
 
 type Meta = { duration: number; width: number; height: number };
 
@@ -185,7 +186,10 @@ export default function Studio() {
               </p>
             )}
 
-            <p className="text-sm text-muted">{t.studio.next}</p>
+            {file && meta && trim && (
+              // Новый файл или другой фрагмент → начинаем экспорт с чистого листа
+              <Exporter key={`${url}|${trim.start}|${trim.end}`} file={file} trim={trim} />
+            )}
           </div>
         )}
       </main>
