@@ -77,6 +77,12 @@ export function exportMp4(
     });
 
     const hasVideo = conversion.utilizedTracks.some((t) => t.type === "video");
+    if (conversion.discardedTracks.length) {
+      console.warn(
+        "EasyLearn export: discarded tracks",
+        conversion.discardedTracks.map((d) => `${d.track.type}: ${d.reason}`),
+      );
+    }
     if (!conversion.isValid || !hasVideo) {
       throw new ExportError(videoCodec ? "noVideo" : "unsupported");
     }

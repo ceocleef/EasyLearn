@@ -6,6 +6,7 @@ import { useT } from "@/i18n/LanguageProvider";
 import { Logo, LangSwitch } from "@/components/Landing";
 import Trimmer, { type Trim } from "@/components/Trimmer";
 import Exporter from "@/components/Exporter";
+import Recorder from "@/components/Recorder";
 
 type Meta = { duration: number; width: number; height: number };
 
@@ -29,6 +30,7 @@ export default function Studio() {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [error, setError] = useState<"notVideo" | "cantPlay" | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [source, setSource] = useState<"upload" | "record">("upload");
 
   // Освобождаем память браузера, когда видео меняется или страница закрывается
   useEffect(() => {
@@ -49,6 +51,23 @@ export default function Studio() {
     setTrim(null);
     setFile(f);
     setUrl(URL.createObjectURL(f));
+  }
+
+  // Вернуться к выбору: загрузить другой файл или записать новое видео
+  function reset() {
+    setError(null);
+    setMeta(null);
+    setTrim(null);
+    setFile(null);
+    setUrl(null);
+  }
+
+  // Видео готово к обрезке: запоминаем длительность и размеры
+  function applyMeta(v: HTMLVideoElement) {
+    setMeta({ duration: v.duration, width: v.videoWidth, height: v.videoHeight });
+    if (isFinite(v.duration) && v.duration > 0) {
+      setTrim({ start: 0, end: v.duration });
+    }
   }
 
   return (
@@ -93,7 +112,30 @@ export default function Studio() {
           </div>
         )}
 
-        {!url ? (
+        {!url && (
+          <div role="tablist" className="mt-6 inline-flex rounded-xl border border-line bg-card p-1 text-sm">
+            {(["upload", "record"] as const).map((id) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={source === id}
+                onClick={() => {
+                  setSource(id);
+                  setError(null);
+                }}
+                className={`rounded-lg px-4 py-2 font-semibold transition ${
+                  source === id ? "bg-accent text-white" : "text-muted hover:text-fg"
+                }`}
+              >
+                {id === "upload" ? t.studio.tabUpload : t.studio.tabRecord}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!url && source === "record" ? (
+          <Recorder onRecorded={openFile} />
+        ) : !url ? (
           /* Зона перетаскивания */
           <div
             onDragOver={(e) => {
@@ -136,10 +178,26 @@ export default function Studio() {
                 className="aspect-video w-full"
                 onLoadedMetadata={(e) => {
                   const v = e.currentTarget;
-                  setMeta({ duration: v.duration, width: v.videoWidth, height: v.videoHeight });
-                  if (isFinite(v.duration) && v.duration > 0) {
-                    setTrim({ start: 0, end: v.duration });
+                  if (isFinite(v.duration)) {
+                    applyMeta(v);
+                    return;
                   }
+                  // У записей с камеры (WebM) браузер сначала не знает длительность.
+                  // Перематываем в самый конец — браузер её вычислит — и возвращаемся в начало.
+                  let done = false;
+                  const finish = () => {
+                    if (done) return;
+                    done = true;
+                    v.removeEventListener("durationchange", onChange);
+                    v.currentTime = 0;
+                    applyMeta(v);
+                  };
+                  const onChange = () => {
+                    if (isFinite(v.duration)) finish();
+                  };
+                  v.addEventListener("durationchange", onChange);
+                  v.currentTime = 1e101;
+                  window.setTimeout(finish, 4000);
                 }}
                 onError={() => setError("cantPlay")}
               />
@@ -149,7 +207,7 @@ export default function Studio() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="font-semibold">{t.studio.info}</h2>
                 <button
-                  onClick={() => inputRef.current?.click()}
+                  onClick={reset}
                   className="rounded-xl border border-line px-4 py-2 text-sm font-semibold transition hover:bg-line"
                 >
                   {t.studio.another}
