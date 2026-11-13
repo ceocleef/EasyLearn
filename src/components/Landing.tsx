@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useT, type Lang } from "@/i18n/LanguageProvider";
+import { useT, useDocumentTitle, type Lang } from "@/i18n/LanguageProvider";
 
 const container = "mx-auto w-full max-w-6xl px-4 sm:px-6";
 const card = "rounded-2xl border border-line bg-card";
@@ -88,6 +88,7 @@ function Icon({ name }: { name: string }) {
 /* ---------- Главный компонент ---------- */
 export default function Landing() {
   const { t } = useT();
+  useDocumentTitle(t.meta.title);
   // Сообщение-заглушка для кнопок, которые пока не работают
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -156,9 +157,9 @@ function Header({ onStub }: { onStub: () => void }) {
         <Logo />
         <nav className="hidden items-center gap-7 text-sm text-muted md:flex">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="transition hover:text-fg">
+            <Link key={l.href} href={l.href} className="transition hover:text-fg">
               {l.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="flex items-center gap-2 sm:gap-3">
@@ -185,14 +186,14 @@ function Header({ onStub }: { onStub: () => void }) {
         <nav className="border-t border-line md:hidden">
           <div className={`${container} flex flex-col py-3`}>
             {links.map((l) => (
-              <a
+              <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
                 className="py-2.5 text-muted hover:text-fg"
               >
                 {l.label}
-              </a>
+              </Link>
             ))}
             <button
               onClick={() => {

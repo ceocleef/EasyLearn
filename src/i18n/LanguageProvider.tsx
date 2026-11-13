@@ -40,7 +40,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = lang;
-    document.title = dictionaries[lang].meta.title;
   }, [lang]);
 
   return (
@@ -54,4 +53,11 @@ export function useT() {
   const ctx = useContext(LanguageContext);
   if (!ctx) throw new Error("useT must be used inside LanguageProvider");
   return ctx;
+}
+
+// Название вкладки браузера на текущем языке
+export function useDocumentTitle(title: string) {
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 }

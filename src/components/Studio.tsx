@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { useT } from "@/i18n/LanguageProvider";
-import { Logo, LangSwitch } from "@/components/Landing";
+import { useT, useDocumentTitle } from "@/i18n/LanguageProvider";
+import PageHeader from "@/components/PageHeader";
 import Trimmer, { type Trim } from "@/components/Trimmer";
 import Exporter from "@/components/Exporter";
 import Recorder from "@/components/Recorder";
@@ -22,6 +21,7 @@ function formatTime(sec: number) {
 
 export default function Studio() {
   const { t } = useT();
+  useDocumentTitle(`${t.studio.title} — EasyLearn`);
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [trim, setTrim] = useState<Trim | null>(null);
@@ -72,20 +72,7 @@ export default function Studio() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-line">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <div className="flex items-center gap-4">
-            <Logo />
-            <span className="hidden text-muted sm:inline">/ {t.studio.title}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <LangSwitch />
-            <Link href="/" className="text-sm text-muted transition hover:text-fg">
-              {t.studio.back}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PageHeader section={t.studio.title} link={{ href: "/", label: t.studio.back }} />
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
         <h1 className="text-3xl font-bold tracking-tight">{t.studio.title}</h1>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useT } from "@/i18n/LanguageProvider";
 import { exportMp4, ExportError, isExportSupported, type ExportJob } from "@/lib/exportMp4";
 import type { Trim } from "@/components/Trimmer";
@@ -119,7 +120,12 @@ export default function Exporter({ file, trim }: { file: File; trim: Trim }) {
               {te.again}
             </button>
           </div>
-          <p className="text-sm text-muted">{te.obsTip}</p>
+          <p className="text-sm text-muted">
+            {te.obsTip}{" "}
+            <Link href="/guide" target="_blank" className="font-semibold text-accent-light hover:underline">
+              {te.guideLink} →
+            </Link>
+          </p>
         </div>
       ) : (
         <div className="mt-5 space-y-4">
